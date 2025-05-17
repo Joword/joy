@@ -1,0 +1,32 @@
+FROM rust:last AS core
+
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    curl \
+    cmake \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rustup component add \
+    rustfmt \
+    clippy \
+    rust-src \
+    rust-analysis \
+    async-trait \
+    serde \
+    tokio \
+    && cargo install cargo-edit cargo-watch
+
+WORKDIR /joy/core
+
+COPY Cargo.toml .
+RUN mkdir core && \
+    echo "fn main() {}" > core/main.rs && \
+    cargo build --release && \
+    rm -rf core
+
+COPY . .
+
+RUN cargo build --release
